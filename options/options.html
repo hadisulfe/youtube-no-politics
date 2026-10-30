@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>YouTube Political Filter — Options</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<header>
+  <h1>YouTube Political Filter</h1>
+  <p class="stats">Hidden today: <b id="today">0</b> · total: <b id="total">0</b></p>
+</header>
+
+<main>
+  <section>
+    <h2>Behaviour</h2>
+    <label class="row"><input type="checkbox" id="enabled"> Enabled</label>
+    <div class="row">
+      <span>When a video matches</span>
+      <label><input type="radio" name="mode" value="hide"> remove it</label>
+      <label><input type="radio" name="mode" value="blur"> blur it with a "show anyway" button</label>
+    </div>
+    <div class="row">
+      <span>Sensitivity</span>
+      <label><input type="radio" name="sensitivity" value="low"> low — blocked channels + core keywords only</label>
+      <label><input type="radio" name="sensitivity" value="normal"> normal — also broader political terms</label>
+      <label><input type="radio" name="sensitivity" value="strict"> strict — also vague words (news, debate, court…) and video descriptions</label>
+    </div>
+    <label class="row"><input type="checkbox" id="hideNewsShelves"> Remove "Breaking news" / "News" shelves on the home page</label>
+    <label class="row"><input type="checkbox" id="filterComments"> Also hide political comments</label>
+  </section>
+
+  <section>
+    <h2>Keywords</h2>
+    <label class="row"><input type="checkbox" id="useDefaultKeywords"> Use the built-in keyword lists (<a href="#" id="showDefaults">view</a>)</label>
+    <p class="hint">One per line. Phrases are fine. Matching is case-insensitive on whole words. Start a line with <code>re:</code> for a regular expression.</p>
+    <div class="cols">
+      <div><h3>Extra keywords to block</h3><textarea id="keywords" rows="10" placeholder="e.g. town council&#10;re:elect\w*"></textarea></div>
+      <div><h3>Never block titles containing</h3><textarea id="whitelistKeywords" rows="10" placeholder="e.g. hearts of iron&#10;civilization 6"></textarea></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Channels</h2>
+    <label class="row"><input type="checkbox" id="useDefaultChannels"> Use the built-in list of news / politics channels</label>
+    <p class="hint">One per line: channel name or <code>@handle</code>. The "Block channel" button that appears on hover adds to this list.</p>
+    <div class="cols">
+      <div><h3>Blocked channels</h3><textarea id="channels" rows="10" placeholder="@somechannel&#10;Some News Network"></textarea></div>
+      <div><h3>Whitelisted channels (never hidden)</h3><textarea id="whitelistChannels" rows="10" placeholder="@friendlychannel"></textarea></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recently hidden <button id="clearLog" class="small">clear</button></h2>
+    <p class="hint">Audit false positives here. "Allow" whitelists the channel, "Allow word" whitelists the matched keyword.</p>
+    <table id="log"><thead><tr><th>When</th><th>Title</th><th>Channel</th><th>Why</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <footer>
+    <button id="save" class="primary">Save</button>
+    <span id="status"></span>
+    <button id="reset" class="danger">Reset everything to defaults</button>
+  </footer>
+</main>
+
+<dialog id="defaultsDialog"><h3>Built-in lists</h3><pre id="defaultsText"></pre><button id="closeDefaults">Close</button></dialog>
+
+<script src="../src/defaults.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

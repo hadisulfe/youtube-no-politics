@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8">
+<style>
+  :root { color-scheme: light dark; }
+  body { width: 240px; margin: 0; padding: 14px; font: 13px/1.4 system-ui, Roboto, Arial, sans-serif; background: Canvas; color: CanvasText; }
+  h1 { font-size: 14px; margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+  .switch { position: relative; width: 38px; height: 22px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; background: #999; border-radius: 22px; transition: .2s; cursor: pointer; }
+  .switch span::before { content: ""; position: absolute; width: 18px; height: 18px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: .2s; }
+  .switch input:checked + span { background: #c00; }
+  .switch input:checked + span::before { transform: translateX(16px); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .stat { background: color-mix(in srgb, CanvasText 8%, transparent); border-radius: 8px; padding: 8px; text-align: center; }
+  .stat b { display: block; font-size: 20px; }
+  .stat small { opacity: .7; }
+  label.row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; }
+  select { font: inherit; }
+  a { display: block; margin-top: 10px; text-align: center; color: inherit; opacity: .8; }
+</style></head>
+<body>
+<h1>Political Filter <label class="switch"><input type="checkbox" id="enabled"><span></span></label></h1>
+<div class="stats">
+  <div class="stat"><b id="page">0</b><small>this page</small></div>
+  <div class="stat"><b id="today">0</b><small>today</small></div>
+</div>
+<label class="row">Mode <select id="mode"><option value="hide">remove</option><option value="blur">blur</option></select></label>
+<label class="row">Sensitivity <select id="sensitivity"><option value="low">low</option><option value="normal">normal</option><option value="strict">strict</option></select></label>
+<a href="#" id="options">Open options &amp; lists</a>
+<script src="popup.js"></script>
+</body></html>

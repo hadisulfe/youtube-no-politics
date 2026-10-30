@@ -1,0 +1,25 @@
+:root { color-scheme: light dark; font: 14px/1.45 system-ui, Roboto, Arial, sans-serif; }
+body { margin: 0; background: Canvas; color: CanvasText; }
+header { padding: 20px 32px; border-bottom: 1px solid color-mix(in srgb, CanvasText 15%, transparent); display: flex; align-items: baseline; gap: 24px; }
+h1 { font-size: 20px; margin: 0; }
+h2 { font-size: 16px; margin: 0 0 10px; display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 13px; margin: 0 0 4px; font-weight: 600; }
+main { max-width: 960px; margin: 0 auto; padding: 16px 32px 80px; }
+section { margin: 24px 0; }
+.row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin: 8px 0; }
+.row > span { min-width: 150px; font-weight: 600; }
+.hint { opacity: .75; font-size: 12.5px; margin: 4px 0 8px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+textarea { width: 100%; box-sizing: border-box; font: 13px/1.4 ui-monospace, monospace; padding: 8px; border-radius: 8px; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); background: color-mix(in srgb, Canvas 92%, CanvasText); color: CanvasText; }
+code { font: 12px ui-monospace, monospace; background: color-mix(in srgb, CanvasText 10%, transparent); padding: 1px 4px; border-radius: 4px; }
+button { cursor: pointer; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); background: color-mix(in srgb, Canvas 90%, CanvasText); color: CanvasText; border-radius: 8px; padding: 6px 14px; font: inherit; }
+button.primary { background: #c00; color: #fff; border-color: #c00; }
+button.danger { color: #c00; margin-left: auto; }
+button.small { font-size: 11px; padding: 2px 8px; font-weight: 400; }
+footer { position: fixed; bottom: 0; left: 0; right: 0; display: flex; gap: 12px; align-items: center; padding: 12px 32px; background: Canvas; border-top: 1px solid color-mix(in srgb, CanvasText 15%, transparent); }
+#status { opacity: .8; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid color-mix(in srgb, CanvasText 10%, transparent); vertical-align: top; }
+td.title { max-width: 380px; }
+dialog { max-width: 720px; border-radius: 12px; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); }
+dialog pre { white-space: pre-wrap; font-size: 12px; max-height: 60vh; overflow: auto; }
