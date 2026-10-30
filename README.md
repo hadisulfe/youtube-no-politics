@@ -20,12 +20,12 @@ Whitelists (channels and words) always win, so you can fix false positives from 
 ## Install (unpacked)
 
 ```sh
-git clone <this repo> ~/yt-political-filter
+git clone https://github.com/hadisulfe/youtube-no-politics.git ~/youtube-no-politics
 ```
 
 1. Open `brave://extensions` (or `chrome://extensions`)
 2. Turn on **Developer mode** (top right)
-3. **Load unpacked** → pick the `~/yt-political-filter` folder
+3. **Load unpacked** → pick the `~/youtube-no-politics` folder
 4. Open YouTube. The toolbar badge shows how many items were hidden on the current page.
 
 After `git pull`, click the reload icon on the extension card.
