@@ -31,20 +31,21 @@ const YPF_SELECTORS = {
   shelfTitle: ["#title", "#title-text", "h2", ".yt-shelf-header-layout-wiz__title", "span#title"],
   title: [
     "#video-title", "a#video-title-link", "#video-title-link",
-    "h3 a", "h3", ".yt-lockup-metadata-view-model-wiz__title", ".yt-lockup-metadata-view-model__title",
+    ".ytLockupMetadataViewModelTitle", ".yt-lockup-metadata-view-model-wiz__title", "h3 a", "h3",
     ".shortsLockupViewModelHostMetadataTitle", ".shortsLockupViewModelHostOutsideMetadataTitle",
     "#content-text", ".media-item-headline", ".yt-core-attributed-string"
   ],
   channel: [
     "ytd-channel-name #text", "ytd-channel-name a", "#channel-name #text", "#channel-name a", "#byline", "#byline a",
-    ".yt-content-metadata-view-model-wiz__metadata-text", ".yt-content-metadata-view-model__metadata-text",
+    ".ytContentMetadataViewModelMetadataRow:first-child .ytContentMetadataViewModelMetadataText",
+    ".yt-content-metadata-view-model-wiz__metadata-row:first-child .yt-content-metadata-view-model-wiz__metadata-text",
     "#text.ytd-channel-name", "#author-text", "a.yt-simple-endpoint.style-scope.yt-formatted-string",
     ".ytm-channel-name", ".ytm-badge-and-byline-renderer"
   ],
   channelLink: ["a[href^='/@']", "a[href^='/channel/']", "a[href^='/c/']", "a[href*='youtube.com/@']", "a[href*='/channel/']"],
   description: ["#description-text", ".metadata-snippet-text", "#description", "yt-formatted-string#description-text", "#metadata-line"],
-  // Where to put the "block channel" button on a card.
-  menuAnchor: ["#menu", "ytd-menu-renderer", ".yt-lockup-metadata-view-model-wiz__menu-button", "#details"],
+  // Avatar buttons carry the channel name in aria-label ("Go to channel X") on the new lockup cards.
+  channelAvatar: ["[aria-label^='Go to channel ']", "[aria-label^='Go to channel: ']"],
   // Watch page: the currently playing video's title and channel, used to blur the player if the current video is political.
   watchTitle: ["ytd-watch-metadata h1 yt-formatted-string", "h1.ytd-watch-metadata", "#title h1"],
   watchChannel: ["ytd-watch-metadata ytd-channel-name #text", "#owner #channel-name #text", "#upload-info #channel-name a"]

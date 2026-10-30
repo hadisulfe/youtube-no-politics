@@ -28,6 +28,10 @@
       if (m) handle = m[1];
       if (!channel) channel = (link.textContent || "").trim();
     }
+    if (!channel) {
+      const av = q(card, YPF_SELECTORS.channelAvatar);
+      if (av) channel = av.getAttribute("aria-label").replace(/^Go to channel:?\s*/, "").trim();
+    }
     const description = settings.sensitivity === "strict" ? text(card, YPF_SELECTORS.description) : "";
     return { title, channel, handle, description };
   }
