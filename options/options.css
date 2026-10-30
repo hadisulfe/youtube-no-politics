@@ -8,6 +8,10 @@ main { max-width: 960px; margin: 0 auto; padding: 16px 32px 80px; }
 section { margin: 24px 0; }
 .row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin: 8px 0; }
 .row > span { min-width: 150px; font-weight: 600; }
+.choices { align-items: flex-start; }
+.choices > span { padding-top: 2px; }
+.choices label { display: block; flex-basis: 100%; margin-left: 166px; }
+.choices label:first-of-type { flex-basis: auto; margin-left: 0; }
 .hint { opacity: .75; font-size: 12.5px; margin: 4px 0 8px; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 textarea { width: 100%; box-sizing: border-box; font: 13px/1.4 ui-monospace, monospace; padding: 8px; border-radius: 8px; border: 1px solid color-mix(in srgb, CanvasText 25%, transparent); background: color-mix(in srgb, Canvas 92%, CanvasText); color: CanvasText; }

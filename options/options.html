@@ -15,12 +15,12 @@
   <section>
     <h2>Behaviour</h2>
     <label class="row"><input type="checkbox" id="enabled"> Enabled</label>
-    <div class="row">
+    <div class="row choices">
       <span>When a video matches</span>
       <label><input type="radio" name="mode" value="hide"> remove it</label>
       <label><input type="radio" name="mode" value="blur"> blur it with a "show anyway" button</label>
     </div>
-    <div class="row">
+    <div class="row choices">
       <span>Sensitivity</span>
       <label><input type="radio" name="sensitivity" value="low"> low — blocked channels + core keywords only</label>
       <label><input type="radio" name="sensitivity" value="normal"> normal — also broader political terms</label>
@@ -32,7 +32,7 @@
 
   <section>
     <h2>Keywords</h2>
-    <label class="row"><input type="checkbox" id="useDefaultKeywords"> Use the built-in keyword lists (<a href="#" id="showDefaults">view</a>)</label>
+    <label class="row"><input type="checkbox" id="useDefaultKeywords"> Use the built-in keyword lists</label> <a href="#" id="showDefaults" class="hint">view built-in lists</a>
     <p class="hint">One per line. Phrases are fine. Matching is case-insensitive on whole words. Start a line with <code>re:</code> for a regular expression.</p>
     <div class="cols">
       <div><h3>Extra keywords to block</h3><textarea id="keywords" rows="10" placeholder="e.g. town council&#10;re:elect\w*"></textarea></div>
