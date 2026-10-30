@@ -18,6 +18,12 @@
   const q = (root, sels) => { for (const s of sels) { const el = root.querySelector(s); if (el) return el; } return null; };
   const text = (root, sels) => { const el = q(root, sels); return el ? (el.getAttribute?.("title") || el.textContent || "").trim() : ""; };
 
+  function videoId(card) {
+    const a = card.querySelector("a[href*='/watch?v='], a[href*='/shorts/']");
+    const m = a?.getAttribute("href")?.match(/(?:v=|\/shorts\/)([\w-]{11})/);
+    return m ? m[1] : "";
+  }
+
   function extract(card) {
     const title = text(card, YPF_SELECTORS.title);
     let channel = text(card, YPF_SELECTORS.channel);
@@ -33,8 +39,38 @@
       if (av) channel = av.getAttribute("aria-label").replace(/^Go to channel:?\s*/, "").trim();
     }
     const description = settings.sensitivity === "strict" ? text(card, YPF_SELECTORS.description) : "";
-    return { title, channel, handle, description };
+    return { title, channel, handle, description, id: videoId(card) };
   }
+
+  // AI tier: cards the keyword lists kept are sent (batched) to the background worker; verdicts come back via ypf:ai-result.
+  const aiVerdicts = new Map();  // id -> 0|1 (this page)
+  let aiQueue = [];
+  let aiTimer = null;
+  function aiAsk(card, info) {
+    if (!settings.aiEnabled || !info.id || aiVerdicts.has(info.id)) return;
+    aiVerdicts.set(info.id, -1);  // pending
+    aiQueue.push({ id: info.id, title: info.title, channel: info.channel || info.handle });
+    if (!aiTimer) aiTimer = setTimeout(aiFlush, 150);
+  }
+  async function aiFlush() {
+    aiTimer = null;
+    const items = aiQueue; aiQueue = [];
+    try {
+      const known = await chrome.runtime.sendMessage({ type: "ypf:ai-classify", items });
+      if (known) applyAiResults(known);
+    } catch (e) { /* worker asleep or extension reloading */ }
+  }
+  function applyAiResults(results) {
+    for (const [id, v] of Object.entries(results)) {
+      aiVerdicts.set(id, v);
+      if (!v) continue;
+      document.querySelectorAll(`[data-ypf-vid="${id}"]`).forEach((card) => {
+        if (card.dataset.ypf === "allowed") return;
+        hide(card, extract(card), { reason: "ai", match: "AI" });
+      });
+    }
+  }
+  chrome.runtime.onMessage.addListener((msg) => { if (msg?.type === "ypf:ai-result") applyAiResults(msg.results); });
 
   function overlay(card, info, verdict) {
     let ov = card.querySelector(":scope > .ypf-overlay");
@@ -42,7 +78,7 @@
     ov = document.createElement("div");
     ov.className = "ypf-overlay";
     const label = document.createElement("div");
-    label.textContent = verdict.reason === "channel" ? "Blocked channel" : `Political: "${verdict.match}"`;
+    label.textContent = verdict.reason === "channel" ? "Blocked channel" : verdict.reason === "ai" ? "Political (AI)" : `Political: "${verdict.match}"`;
     const sub = document.createElement("small");
     sub.textContent = info.title;
     const btn = document.createElement("button");
@@ -101,9 +137,11 @@
     if (card.dataset.ypfSig === sig && card.dataset.ypf === "allowed") return;
     if (card.dataset.ypfSig !== sig) { delete card.dataset.ypf; card.querySelector(":scope > .ypf-overlay")?.remove(); }
     card.dataset.ypfSig = sig;
+    if (info.id) card.dataset.ypfVid = info.id; else delete card.dataset.ypfVid;
     const verdict = classifier.classify(info);
     if (verdict) hide(card, info, verdict);
-    else { restore(card); blockButton(card, info); }
+    else if (info.id && aiVerdicts.get(info.id) === 1) hide(card, info, { reason: "ai", match: "AI" });
+    else { restore(card); blockButton(card, info); aiAsk(card, info); }
   }
 
   function processShelf(shelf) {
@@ -166,7 +204,7 @@
   function applySettings(s) {
     settings = { ...YPF_DEFAULTS, ...s };
     classifier = new YPFClassifier(settings);
-    counted.clear(); pageCount = 0;
+    counted.clear(); pageCount = 0; aiVerdicts.clear();
     unhideAll();
     if (settings.enabled) { scan(); chrome.runtime.sendMessage({ type: "ypf:count", count: pageCount }).catch(() => {}); }
     else chrome.runtime.sendMessage({ type: "ypf:disabled" }).catch(() => {});
@@ -176,14 +214,14 @@
     applySettings(s);
     const obs = new MutationObserver(scheduleScan);
     obs.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
-    window.addEventListener("yt-navigate-finish", () => { counted.clear(); pageCount = 0; scheduleScan(); });
+    window.addEventListener("yt-navigate-finish", () => { counted.clear(); pageCount = 0; aiVerdicts.clear(); scheduleScan(); });
     window.addEventListener("yt-page-data-updated", scheduleScan);
     setInterval(scheduleScan, 2000); // safety net for in-place renderer recycling without mutations we catch
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
-    if (Object.keys(changes).every((k) => k === "stats" || k === "log")) return;
+    if (Object.keys(changes).every((k) => k === "stats" || k === "log" || k === "aiCache")) return;
     chrome.storage.local.get(null).then(applySettings);
   });
 })();

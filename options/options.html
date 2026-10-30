@@ -51,6 +51,23 @@
   </section>
 
   <section>
+    <h2>AI check (optional)</h2>
+    <p class="hint">Titles the keyword lists let through are sent in batches to an OpenAI-compatible chat endpoint and the verdict is cached per video.
+      Default is a local <a href="https://ollama.com" target="_blank">Ollama</a> (<code>ollama pull qwen2.5:3b</code>, nothing leaves your machine). Any other provider works with its base URL + API key.</p>
+    <label class="row"><input type="checkbox" id="aiEnabled"> Enable AI check</label>
+    <div class="grid3">
+      <label>Base URL<input type="text" id="aiBaseUrl" placeholder="http://localhost:11434/v1"></label>
+      <label>Model<input type="text" id="aiModel" placeholder="qwen2.5:3b"></label>
+      <label>API key (if needed)<input type="password" id="aiApiKey" autocomplete="off"></label>
+    </div>
+    <div class="row">
+      <button id="aiTest" class="small">Test connection</button>
+      <span id="aiTestResult" class="hint"></span>
+      <span class="hint" style="margin-left:auto">Cached verdicts: <b id="aiCacheSize">0</b> <button id="aiClearCache" class="small">clear</button></span>
+    </div>
+  </section>
+
+  <section>
     <h2>Recently hidden <button id="clearLog" class="small">clear</button></h2>
     <p class="hint">Audit false positives here. "Allow" whitelists the channel, "Allow word" whitelists the matched keyword.</p>
     <table id="log"><thead><tr><th>When</th><th>Title</th><th>Channel</th><th>Why</th><th></th></tr></thead><tbody></tbody></table>

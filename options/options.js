@@ -16,6 +16,11 @@ async function load() {
   $("whitelistKeywords").value = s.whitelistKeywords.join("\n");
   $("channels").value = s.channels.join("\n");
   $("whitelistChannels").value = s.whitelistChannels.join("\n");
+  $("aiEnabled").checked = s.aiEnabled;
+  $("aiBaseUrl").value = s.aiBaseUrl;
+  $("aiModel").value = s.aiModel;
+  $("aiApiKey").value = s.aiApiKey;
+  chrome.runtime.sendMessage({ type: "ypf:ai-status" }).then((r) => { if (r) $("aiCacheSize").textContent = r.cacheSize; }).catch(() => {});
   $("today").textContent = s.stats.todayDate === new Date().toDateString() ? s.stats.today : 0;
   $("total").textContent = s.stats.total;
   renderLog(s.log);
@@ -51,8 +56,26 @@ function renderLog(log) {
 function addLine(id, v) { const l = lines($(id).value); if (!l.some((x) => x.toLowerCase() === v.toLowerCase())) l.push(v); $(id).value = l.join("\n"); flash("Added — remember to Save"); }
 function removeLine(id, v) { $(id).value = lines($(id).value).filter((x) => x.toLowerCase() !== v.toLowerCase()).join("\n"); }
 
+// Remote endpoints need an optional host permission; localhost is already granted in the manifest.
+async function ensureAiPermission(baseUrl) {
+  let origin;
+  try { origin = new URL(baseUrl).origin; } catch { throw new Error("Base URL is not a valid URL"); }
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return;
+  const perm = { origins: [origin + "/*"] };
+  if (await chrome.permissions.contains(perm)) return;
+  if (!(await chrome.permissions.request(perm))) throw new Error(`Permission for ${origin} was not granted`);
+}
+
 async function save() {
+  if ($("aiEnabled").checked) {
+    try { await ensureAiPermission($("aiBaseUrl").value.trim()); }
+    catch (e) { flash(e.message); $("aiEnabled").checked = false; }
+  }
   await chrome.storage.local.set({
+    aiEnabled: $("aiEnabled").checked,
+    aiBaseUrl: $("aiBaseUrl").value.trim() || YPF_DEFAULTS.aiBaseUrl,
+    aiModel: $("aiModel").value.trim() || YPF_DEFAULTS.aiModel,
+    aiApiKey: $("aiApiKey").value.trim(),
     enabled: $("enabled").checked,
     mode: radio("mode"),
     sensitivity: radio("sensitivity"),
@@ -80,6 +103,16 @@ $("showDefaults").onclick = (e) => {
     `CORE KEYWORDS (all levels)\n${YPF_CORE_KEYWORDS.join(", ")}\n\nEXTENDED (normal + strict)\n${YPF_EXTENDED_KEYWORDS.join(", ")}\n\nSTRICT ONLY\n${YPF_STRICT_KEYWORDS.join(", ")}\n\nCHANNELS\n${YPF_DEFAULT_CHANNELS.join(", ")}`;
   $("defaultsDialog").showModal();
 };
+$("aiTest").onclick = async () => {
+  $("aiTestResult").textContent = "testing…";
+  try {
+    await ensureAiPermission($("aiBaseUrl").value.trim());
+    await chrome.storage.local.set({ aiBaseUrl: $("aiBaseUrl").value.trim() || YPF_DEFAULTS.aiBaseUrl, aiModel: $("aiModel").value.trim() || YPF_DEFAULTS.aiModel, aiApiKey: $("aiApiKey").value.trim() });
+    const r = await chrome.runtime.sendMessage({ type: "ypf:ai-test" });
+    $("aiTestResult").textContent = r.error ? `Failed: ${r.error}` : r.ok ? `OK — model answered correctly in ${r.ms} ms` : `Reached the model (${r.ms} ms) but it misclassified the sample [${r.verdicts}] — try a bigger model`;
+  } catch (e) { $("aiTestResult").textContent = `Failed: ${e.message}`; }
+};
+$("aiClearCache").onclick = async () => { await chrome.runtime.sendMessage({ type: "ypf:ai-clear-cache" }); $("aiCacheSize").textContent = "0"; };
 $("closeDefaults").onclick = () => $("defaultsDialog").close();
 chrome.storage.onChanged.addListener((ch) => { if (ch.stats || ch.log) load(); });
 load();

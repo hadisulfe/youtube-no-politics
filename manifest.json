@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "YouTube Political Filter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hides political videos, channels and shelves from YouTube's feed, search, sidebar and Shorts.",
   "permissions": ["storage"],
-  "host_permissions": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
-  "background": { "service_worker": "src/background.js" },
+  "host_permissions": ["https://www.youtube.com/*", "https://m.youtube.com/*", "http://localhost/*", "http://127.0.0.1/*"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "src/background.js", "type": "module" },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],

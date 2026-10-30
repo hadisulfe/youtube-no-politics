@@ -13,6 +13,10 @@ const YPF_DEFAULTS = {
   channels: [],            // user-blocked channels (lower-cased channel names or @handles)
   whitelistChannels: [],   // never filter these channels
   whitelistKeywords: [],   // a title containing one of these is never filtered
+  aiEnabled: false,        // opt-in: ask an LLM about titles the keyword lists did not catch
+  aiBaseUrl: "http://localhost:11434/v1",  // any OpenAI-compatible endpoint (Ollama, LM Studio, OpenRouter, Groq...)
+  aiModel: "qwen2.5:3b",
+  aiApiKey: "",
   stats: { total: 0, today: 0, todayDate: "" },
   log: []                  // last N hidden items for auditing false positives
 };
