@@ -6,10 +6,25 @@ export const YPF_AI = (() => {
   const BATCH_MAX = 25;
   const DEBOUNCE_MS = 400;
 
-  const SYSTEM_PROMPT = `You label YouTube videos as POLITICAL or NOT from their title and channel name.
-POLITICAL means: politicians, elections, parties, government policy or legislation, geopolitics, wars and armed conflicts, protests, partisan news or commentary, culture-war controversies (immigration, abortion, gun control, gender politics, etc.), political satire.
-NOT political: gaming, tech, music, sports, science, history older than ~30 years, cooking, vlogs, entertainment, business/finance without policy focus.
-Answer with exactly one line per item, in order, formatted "<n>: Y" or "<n>: N". No other text.`;
+  const SYSTEM_PROMPT = `You are a strict filter that decides whether a YouTube video is about CURRENT POLITICS, using only its title and channel name.
+Answer Y only if the video is clearly about: politicians or political parties; elections and voting; government policy, legislation or court rulings; ongoing wars, geopolitics or international relations; protests and activism; partisan news or political commentary; hot-button political controversies (immigration, abortion, gun control, gender politics, racism debates, climate policy).
+Answer N for everything else, including: history documentaries about events older than about 30 years (WW2, Cold War, Civil War, ancient history), true crime and local crime news, nature, science, space, tech, gaming, music, sports, business and finance, celebrities, mysteries and conspiracies, religion, lifestyle, travel.
+If unsure, answer N.
+Reply with exactly one line per item, in order: "<n>: Y" or "<n>: N". No other text.`;
+
+  const EXAMPLE_USER = `Label these 6 videos:
+1: Senate passes budget bill after late-night vote — CNN
+2: I built a PC in a shoebox — Linus Tech Tips
+3: D-Day to the Rhine: The Complete WW2 Western Front Documentary — Get.factual
+4: Tiger Island: Part One | PBS Nature | Full Documentary — Nature on PBS
+5: Why Germany's far-right AfD is surging — DW News
+6: He Killed Jeffrey Dahmer - True Crime Documentary — True Crime`;
+  const EXAMPLE_ASSISTANT = `1: Y
+2: N
+3: N
+4: N
+5: Y
+6: N`;
 
   let settings = {};
   const pending = new Map();   // id -> {title, channel, tabs:Set<tabId>}
@@ -47,7 +62,8 @@ Answer with exactly one line per item, in order, formatted "<n>: Y" or "<n>: N".
   }
 
   async function callModel(items) {
-    const user = items.map((it, i) => `${i + 1}: ${it.title}${it.channel ? ` — ${it.channel}` : ""}`).join("\n");
+    const user = `Label these ${items.length} videos:\n` +
+      items.map((it, i) => `${i + 1}: ${it.title}${it.channel ? ` — ${it.channel}` : ""}`).join("\n");
     const headers = { "Content-Type": "application/json" };
     if (settings.aiApiKey) headers.Authorization = `Bearer ${settings.aiApiKey}`;
     const res = await fetch(endpoint(), {
@@ -56,24 +72,44 @@ Answer with exactly one line per item, in order, formatted "<n>: Y" or "<n>: N".
         model: settings.aiModel,
         temperature: 0,
         max_tokens: Math.max(64, items.length * 8),
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, { role: "user", content: user }]
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: EXAMPLE_USER },
+          { role: "assistant", content: EXAMPLE_ASSISTANT },
+          { role: "user", content: user }
+        ]
       })
     });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${(await res.text()).slice(0, 200)}`);
+    if (!res.ok) {
+      const body = (await res.text()).slice(0, 200);
+      const hint = res.status === 403 && /\/\/(localhost|127\.0\.0\.1):11434\b/.test(endpoint())
+        ? ' — Ollama blocks browser extensions by default; start it with OLLAMA_ORIGINS="chrome-extension://*" (see README)'
+        : "";
+      throw new Error(`${res.status} ${res.statusText}: ${body}${hint}`);
+    }
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content ?? "";
+    lastRaw = { prompt: user, response: text };
     return parse(text, items.length);
   }
 
   // Accepts "1: Y", "1. N", "1 - yes", one per line; anything unparsed counts as not political.
   function parse(text, n) {
     const out = new Array(n).fill(0);
+    let numbered = 0;
     for (const line of text.split(/\n+/)) {
       const m = line.match(/^\s*(\d+)\s*[:.)\-]\s*(y|n|yes|no|political|not)/i);
       if (!m) continue;
       const i = Number(m[1]) - 1;
-      if (i >= 0 && i < n) out[i] = /^(y|yes|political)$/i.test(m[2]) ? 1 : 0;
+      if (i >= 0 && i < n) {
+        out[i] = /^(y|yes|political)$/i.test(m[2]) ? 1 : 0;
+        numbered++;
+      }
     }
+    if (numbered) return out;
+    // Small models sometimes drop the numbers and emit a bare "Y, N, Y…" sequence.
+    const bare = text.match(/\b(y|n|yes|no)\b/gi) || [];
+    if (bare.length === n) return bare.map((t) => (/^y/i.test(t) ? 1 : 0));
     return out;
   }
 
@@ -103,6 +139,7 @@ Answer with exactly one line per item, in order, formatted "<n>: Y" or "<n>: N".
   }
 
   let lastError = "";
+  let lastRaw = null;
 
   // Returns cached verdicts immediately; queues the rest and answers them later via ypf:ai-result.
   async function classify(items, tabId) {
@@ -131,5 +168,5 @@ Answer with exactly one line per item, in order, formatted "<n>: Y" or "<n>: N".
 
   async function cacheSize() { await loadCache(); return cacheOrder.length; }
 
-  return { configure, classify, test, clearCache, cacheSize, parse, get lastError() { return lastError; } };
+  return { configure, classify, test, clearCache, cacheSize, parse, get lastError() { return lastError; }, get lastRaw() { return lastRaw; } };
 })();

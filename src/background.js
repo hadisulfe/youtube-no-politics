@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 const YPF_DEFAULTS_BG = {
   enabled: true, mode: "hide", sensitivity: "normal", filterComments: false, hideNewsShelves: true,
   useDefaultKeywords: true, useDefaultChannels: true, keywords: [], channels: [], whitelistChannels: [], whitelistKeywords: [],
-  aiEnabled: false, aiBaseUrl: "http://localhost:11434/v1", aiModel: "qwen2.5:3b", aiApiKey: ""
+  aiEnabled: false, aiBaseUrl: "http://localhost:11434/v1", aiModel: "qwen2.5:7b", aiApiKey: ""
 };
 
 const AI_KEYS = ["aiEnabled", "aiBaseUrl", "aiModel", "aiApiKey"];
@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
   if (msg?.type === "ypf:ai-clear-cache") { YPF_AI.clearCache().then(() => sendResponse({ ok: true })); return true; }
-  if (msg?.type === "ypf:ai-status") { YPF_AI.cacheSize().then((n) => sendResponse({ cacheSize: n, lastError: YPF_AI.lastError })); return true; }
+  if (msg?.type === "ypf:ai-status") { YPF_AI.cacheSize().then((n) => sendResponse({ cacheSize: n, lastError: YPF_AI.lastError, lastRaw: YPF_AI.lastRaw })); return true; }
   if (msg?.type === "ypf:count" && sender.tab?.id != null) {
     chrome.action.setBadgeBackgroundColor({ color: "#c00" });
     chrome.action.setBadgeText({ tabId: sender.tab.id, text: msg.count ? String(msg.count) : "" });

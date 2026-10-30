@@ -53,11 +53,11 @@
   <section>
     <h2>AI check (optional)</h2>
     <p class="hint">Titles the keyword lists let through are sent in batches to an OpenAI-compatible chat endpoint and the verdict is cached per video.
-      Default is a local <a href="https://ollama.com" target="_blank">Ollama</a> (<code>ollama pull qwen2.5:3b</code>, nothing leaves your machine). Any other provider works with its base URL + API key.</p>
+      Default is a local <a href="https://ollama.com" target="_blank">Ollama</a> (<code>ollama pull qwen2.5:7b</code>, nothing leaves your machine). Any other provider works with its base URL + API key.</p>
     <label class="row"><input type="checkbox" id="aiEnabled"> Enable AI check</label>
     <div class="grid3">
       <label>Base URL<input type="text" id="aiBaseUrl" placeholder="http://localhost:11434/v1"></label>
-      <label>Model<input type="text" id="aiModel" placeholder="qwen2.5:3b"></label>
+      <label>Model<input type="text" id="aiModel" placeholder="qwen2.5:7b"></label>
       <label>API key (if needed)<input type="password" id="aiApiKey" autocomplete="off"></label>
     </div>
     <div class="row">

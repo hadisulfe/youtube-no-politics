@@ -9,5 +9,7 @@ check(JSON.stringify(YPF_AI.parse("1. yes\n2) no\n3 - Political", 3)) === "[1,0,
 check(JSON.stringify(YPF_AI.parse("Sure! Here are the labels:\n1: N\n2: Y\nHope this helps", 2)) === "[0,1]", "chatter around the answer");
 check(JSON.stringify(YPF_AI.parse("garbage", 2)) === "[0,0]", "unparsable -> not political");
 check(JSON.stringify(YPF_AI.parse("1: Y\n5: Y", 2)) === "[1,0]", "out-of-range index ignored");
+check(JSON.stringify(YPF_AI.parse("N: Y: N", 3)) === "[0,1,0]", "bare Y/N sequence fallback");
+check(JSON.stringify(YPF_AI.parse("Y, N, Y, N", 3)) === "[0,0,0]", "bare sequence with wrong count ignored");
 console.log(fails ? `${fails} failure(s)` : "all passed");
 process.exit(fails ? 1 : 0);

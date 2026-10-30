@@ -25,14 +25,23 @@ Nothing leaves your machine, no API key, and it works where cloud LLM APIs are g
 # Arch
 sudo pacman -S ollama            # or ollama-cuda for NVIDIA
 sudo systemctl enable --now ollama
-ollama pull qwen2.5:3b           # ~2 GB; qwen2.5:1.5b is faster, qwen2.5:7b more accurate
+ollama pull qwen2.5:7b           # ~4.7 GB, fits an 8 GB GPU; llama3.2:3b (2 GB) is a decent lighter option
+
+# Ollama rejects requests from browser extensions (HTTP 403) unless you allow the origin:
+sudo systemctl edit ollama       # add the two lines below, save, then:
+#   [Service]
+#   Environment="OLLAMA_ORIGINS=chrome-extension://*"
+sudo systemctl restart ollama
 ```
 
 Then in the extension options: tick **Enable AI check**, keep `http://localhost:11434/v1` and the model name,
-click **Test connection**, Save. Ollama allows `chrome-extension://` origins by default, so no CORS config is needed.
+click **Test connection**, Save.
 
 Any other OpenAI-compatible provider works too (LM Studio, OpenRouter, Groq, OpenAI…): set its base URL
 (e.g. `https://openrouter.ai/api/v1`), model and API key. The browser will ask once for permission to contact that host.
+
+Model choice matters: on a 30-title test set qwen2.5:7b got 29/30, llama3.2:3b 26/30, while qwen2.5:3b and
+smaller flagged most history / nature / true-crime documentaries as political — avoid those.
 
 Cards that only the AI catches appear for a moment before the verdict arrives (~0.5–2 s on a GPU, instant once cached).
 
